@@ -176,7 +176,7 @@ dependencies = [
 test = [
     # pytest 9 与 pytest-forked 不兼容，CI 的 --forked 会直接崩溃；
     # 锁定在 pytest 8.x，与上游 CI 通过时的依赖栈保持一致。
-    "pytest>=8.0,<9.0",
+    "pytest>=8.0,<10.0",
     "pytest-asyncio>=0.24,<2",
     "pytest-timeout>=2.3",
     "pytest-forked>=1.6",
