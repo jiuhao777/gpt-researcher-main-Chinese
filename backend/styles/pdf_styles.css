@@ -1,0 +1,98 @@
+/* PDF 排版：中文宋体、西文 Times New Roman、正文小四、行距 20 磅、
+   页边距 左 3cm / 右 2.5cm（上、下沿用 2.54cm） */
+
+@page {
+    size: A4;
+    margin: 2.54cm 2.5cm 2.54cm 3cm; /* 上 右 下 左 */
+}
+
+body {
+    /* 拉丁字符与数字优先用 Times New Roman，中文回退到宋体 */
+    font-family: "Times New Roman", "SimSun", "宋体", serif;
+    font-size: 12pt;      /* 小四 */
+    line-height: 20pt;    /* 固定 20 磅行距 */
+    letter-spacing: normal;
+    color: #000;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Times New Roman", "SimSun", "宋体", serif;
+    color: #000;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    line-height: 20pt;
+}
+
+h1 {
+    font-size: 16pt; /* 三号 */
+}
+
+h2 {
+    font-size: 14pt; /* 四号 */
+}
+
+h3, h4, h5, h6 {
+    font-size: 12pt; /* 小四 */
+}
+
+p {
+    margin: 0 0 0.5em 0;
+    text-align: justify;
+    text-indent: 2em; /* 正文首行缩进 2 字符 */
+}
+
+/* 引用、列表、表格内的段落不缩进 */
+blockquote p,
+li p,
+td p,
+th p,
+table p {
+    text-indent: 0;
+}
+
+ul, ol {
+    margin: 0 0 0.5em 0;
+    padding-left: 2em;
+}
+
+li {
+    line-height: 20pt;
+}
+
+blockquote {
+    font-style: normal;
+    margin: 0.5em 0;
+    padding: 0.5em 1em;
+    border-left: 3px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12pt;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 6px;
+}
+
+th {
+    background-color: #f2f2f2;
+    color: #000;
+}
+
+img {
+    max-width: 100%;
+}
+
+code {
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10.5pt;
+}
