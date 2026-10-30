@@ -172,6 +172,97 @@ cd gpt-researcher-main-Chinese
 
 ---
 
+## 🔄 切换模型供应商
+
+项目内置 `provider_setup.py`，一条命令即可切换到 DeepSeek、千问、Kimi、智谱等供应商，不用手改 `.env`。
+
+### 支持的供应商
+
+| 名称 | 说明 | Key 环境变量 | 向量化 |
+|---|---|---|---|
+| `dashscope`（别名 `qwen`） | 阿里云百炼 / 通义千问 | `DASHSCOPE_API_KEY` | ✅ |
+| `deepseek` | DeepSeek | `DEEPSEEK_API_KEY` | ❌ 自动降级 keyword |
+| `openai` | OpenAI 官方 | `OPENAI_API_KEY` | ✅ |
+| `moonshot`（别名 `kimi`） | 月之暗面 | `OPENAI_API_KEY` + base | ❌ |
+| `zhipu`（别名 `glm`） | 智谱 GLM | `OPENAI_API_KEY` + base | ✅ |
+| `minimax` | MiniMax | `MINIMAX_API_KEY` | ❌ |
+| `siliconflow` | 硅基流动 | `OPENAI_API_KEY` + base | ✅ |
+| `volcengine`（别名 `doubao` / `ark`） | 火山方舟（豆包） | `OPENAI_API_KEY` + base | ❌ |
+| `openrouter` | OpenRouter | `OPENROUTER_API_KEY` | ❌ |
+| `groq` | Groq | `GROQ_API_KEY` | ❌ |
+| `ollama` | 本地 Ollama | 无需 Key | ✅ |
+
+### 用法
+
+```powershell
+# 交互式选择（推荐）
+.\.venv\Scripts\python.exe provider_setup.py
+
+# 直接指定供应商
+.\.venv\Scripts\python.exe provider_setup.py --provider deepseek --key sk-xxxx
+
+# 切换并立即验证连通性
+.\.venv\Scripts\python.exe provider_setup.py --provider qwen --key sk-xxxx --check
+
+# 只预览会写入什么，不修改 .env
+.\.venv\Scripts\python.exe provider_setup.py --provider kimi --key sk-xxxx --dry-run
+
+# 查看全部供应商
+.\.venv\Scripts\python.exe provider_setup.py --list
+```
+
+脚本只维护 `.env` 里 `# >>> provider config` 标记块，不会改动 `RETRIEVER`、`LANGUAGE` 等其他配置。切换后重启服务生效。
+
+### 手动配置示例
+
+DeepSeek（无 embedding，自动降级关键词过滤）：
+
+```ini
+DEEPSEEK_API_KEY=sk-你的DeepSeekKey
+FAST_LLM=deepseek:deepseek-chat
+SMART_LLM=deepseek:deepseek-chat
+STRATEGIC_LLM=deepseek:deepseek-chat
+CONTEXT_FILTER=keyword
+```
+
+Kimi / Moonshot（OpenAI 兼容）：
+
+```ini
+OPENAI_API_KEY=sk-你的MoonshotKey
+OPENAI_BASE_URL=https://api.moonshot.cn/v1
+FAST_LLM=openai:moonshot-v1-8k
+SMART_LLM=openai:moonshot-v1-32k
+STRATEGIC_LLM=openai:moonshot-v1-32k
+CONTEXT_FILTER=keyword
+```
+
+智谱 GLM：
+
+```ini
+OPENAI_API_KEY=你的智谱Key
+OPENAI_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+FAST_LLM=openai:glm-4-flash
+SMART_LLM=openai:glm-4-plus
+STRATEGIC_LLM=openai:glm-4-plus
+EMBEDDING=openai:embedding-3
+```
+
+> DeepSeek、Kimi、火山方舟等没有 embedding 接口，脚本会自动把 `CONTEXT_FILTER` 设为 `keyword`（用关键词排序代替向量检索），报告仍可正常生成，只是上下文筛选策略不同。如果你同时有百炼或 OpenAI 的 Key，把 `EMBEDDING` 指过去即可恢复向量筛选。
+
+### 常见供应商 Key 获取地址
+
+| 供应商 | 地址 |
+|---|---|
+| 阿里云百炼 | https://bailian.console.aliyun.com/ |
+| DeepSeek | https://platform.deepseek.com/api_keys |
+| 月之暗面 | https://platform.moonshot.cn/console/api-keys |
+| 智谱 | https://open.bigmodel.cn/usercenter/apikeys |
+| 硅基流动 | https://cloud.siliconflow.cn/account/ak |
+| 火山方舟 | https://console.volcengine.com/ark |
+| OpenRouter | https://openrouter.ai/keys |
+| Groq | https://console.groq.com/keys |
+| 博查 | https://open.bochaai.com/ |
+
 ## ⚙️ `.env` 配置说明
 
 一个可用的最小配置如下（**请替换为你自己的 Key**）：

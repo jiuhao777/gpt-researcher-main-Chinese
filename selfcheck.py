@@ -43,10 +43,24 @@ def main():
     print("GPT Researcher 自检")
     print("=" * 64)
 
-    print("\n[1/5] 环境变量")
-    for key in ("DASHSCOPE_API_KEY", "BOCHA_API_KEY"):
-        value = os.getenv(key, "")
-        check(f"{key} 已配置", bool(value), f"长度 {len(value)}")
+    print("\n[1/5] 环境变量与模型供应商")
+    try:
+        import provider_setup as ps
+    except Exception as exc:  # noqa: BLE001
+        ps = None
+        check("导入 provider_setup", False, str(exc)[:70])
+
+    provider = (os.getenv("PROVIDER") or "dashscope").strip()
+    provider_cfg = ps.PROVIDERS.get(provider) if ps else None
+    if provider_cfg:
+        print(f"  当前供应商：{provider}（{provider_cfg['label']}）")
+        if provider_cfg["env_key"]:
+            value = os.getenv(provider_cfg["env_key"], "")
+            check(f"{provider_cfg['env_key']} 已配置", bool(value), f"长度 {len(value)}")
+    else:
+        check(f"供应商 {provider} 可识别", False, "运行 provider_setup.py --list 查看")
+
+    check("BOCHA_API_KEY 已配置", bool(os.getenv("BOCHA_API_KEY")), "")
     check("RETRIEVER=bocha", os.getenv("RETRIEVER") == "bocha", os.getenv("RETRIEVER", ""))
     check("LANGUAGE 已配置", bool(os.getenv("LANGUAGE")), os.getenv("LANGUAGE", ""))
     check("SMART_LLM", bool(os.getenv("SMART_LLM")), os.getenv("SMART_LLM", ""))
@@ -73,21 +87,12 @@ def main():
     if args.offline:
         print("  [SKIP] --offline 模式下跳过")
     else:
-        try:
-            from openai import OpenAI
-
-            client = OpenAI(
-                api_key=os.environ["DASHSCOPE_API_KEY"],
-                base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            )
-            response = client.chat.completions.create(
-                model="qwen-plus",
-                messages=[{"role": "user", "content": "回复 OK"}],
-                max_tokens=5,
-            )
-            check("百炼 qwen-plus", True, response.choices[0].message.content.strip()[:20])
-        except Exception as exc:  # noqa: BLE001
-            check("百炼 qwen-plus", False, str(exc)[:140])
+        if provider_cfg and ps:
+            key = os.getenv(provider_cfg["env_key"], "") if provider_cfg["env_key"] else None
+            ok = ps.check_provider(provider, key, verbose=False)
+            check(f"{provider_cfg['label']} 连通性", ok, provider_cfg["smart_model"])
+        else:
+            check("模型连通性", False, "供应商配置缺失")
 
         try:
             import requests
