@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "多智能体 LangGraph 状态图",
+    "quality_profile": "showcase",
+    "viewBox": [960, 590],
+    "views": [
+      {
+        "id": "happy-path",
+        "label": "无返工的主路径",
+        "focus": ["browser", "planner", "human", "researcher", "writer", "publish"],
+        "note": "计划一次通过、核查无问题时的最短路径。"
+      },
+      {
+        "id": "review-loops",
+        "label": "两个审核循环",
+        "focus": ["planner", "human", "writer", "publish"],
+        "note": "计划返工回到 planner，事实返工回到 writer，都有次数上限。"
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "orch", "label": "编排与审核" },
+    { "id": "research", "label": "研究" },
+    { "id": "writing", "label": "写作" },
+    { "id": "review", "label": "核查与发布" }
+  ],
+  "mainPath": ["browser", "planner", "human", "researcher", "writer", "publish"],
+  "nodes": [
+    { "id": "browser", "lane": "orch", "col": 0, "type": "backend", "label": "browser", "sublabel": "初始研究" },
+    { "id": "planner", "lane": "orch", "col": 2, "type": "backend", "label": "planner", "sublabel": "规划大纲", "tag": "LLM" },
+    { "id": "human", "lane": "orch", "col": 4, "type": "security", "label": "human", "sublabel": "计划审核", "tag": "人工门" },
+    { "id": "researcher", "lane": "research", "col": 5, "type": "backend", "label": "researcher", "sublabel": "并行子研究" },
+    { "id": "writer", "lane": "writing", "col": 5, "type": "backend", "label": "writer", "sublabel": "撰写", "tag": "LLM" },
+    { "id": "publish", "lane": "review", "col": 5, "type": "security", "label": "publish", "sublabel": "核查 + 发布" }
+  ],
+  "edges": [
+    { "id": "initial", "from": "browser", "to": "planner", "label": "初始资料", "role": "main" },
+    { "id": "plan", "from": "planner", "to": "human", "label": "计划", "role": "main" },
+    { "id": "accept-plan", "from": "human", "to": "researcher", "label": "accept", "role": "main", "labelDy": 11 },
+    { "id": "revise-plan", "from": "human", "to": "planner", "label": "revise", "role": "branch", "route": "up-channel" },
+    { "id": "research-done", "from": "researcher", "to": "writer", "role": "main" },
+    { "id": "draft", "from": "writer", "to": "publish", "role": "main" },
+    { "id": "revise-facts", "from": "publish", "to": "writer", "label": "revise", "role": "branch", "route": "return-left", "labelDy": 30 }
+  ]
+}

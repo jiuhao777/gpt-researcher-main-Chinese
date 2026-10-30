@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "GPT Researcher 研究流水线",
+    "quality_profile": "showcase",
+    "viewBox": [960, 590],
+    "views": [
+      {
+        "id": "main-path",
+        "label": "一次研究的主路径",
+        "focus": ["web_ui", "selector", "planner", "gather", "writer", "report"],
+        "note": "从用户提问到导出报告，共 6 个阶段。"
+      },
+      {
+        "id": "llm-decisions",
+        "label": "LLM 决策点",
+        "focus": ["selector", "planner", "gather", "writer"],
+        "note": "只有这 4 处由模型判断，其余是代码编排。"
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "entry", "label": "入口" },
+    { "id": "agent", "label": "Agent 决策" },
+    { "id": "collect", "label": "检索与加工" },
+    { "id": "output", "label": "产出" }
+  ],
+  "phases": [
+    { "id": "intake", "label": "提问", "fromCol": 0, "toCol": 0 },
+    { "id": "plan", "label": "规划", "fromCol": 1, "toCol": 1, "variant": "emphasis" },
+    { "id": "gather", "label": "检索抓取", "fromCol": 2, "toCol": 2 },
+    { "id": "write", "label": "写作", "fromCol": 3, "toCol": 3, "variant": "emphasis" },
+    { "id": "deliver", "label": "导出", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": ["web_ui", "selector", "planner", "gather", "writer", "report"],
+  "nodes": [
+    { "id": "web_ui", "lane": "entry", "col": 0, "type": "frontend", "label": "Web / CLI", "sublabel": "用户查询" },
+    { "id": "selector", "lane": "agent", "col": 0, "type": "backend", "label": "choose_agent", "sublabel": "LLM 选角色" },
+    { "id": "planner", "lane": "agent", "col": 2, "type": "backend", "label": "plan_research", "sublabel": "LLM 拆子查询", "tag": "决策点" },
+    { "id": "gather", "lane": "collect", "col": 2, "type": "external", "label": "检索 + 抓取", "sublabel": "博查 → 网页正文" },
+    { "id": "writer", "lane": "agent", "col": 4, "type": "backend", "label": "write_report", "sublabel": "分章节生成", "tag": "决策点" },
+    { "id": "report", "lane": "output", "col": 4, "type": "backend", "label": "报告与导出", "sublabel": "MD / DOCX / PDF" }
+  ],
+  "edges": [
+    { "id": "ask", "from": "web_ui", "to": "selector", "label": "query", "role": "main" },
+    { "id": "role", "from": "selector", "to": "planner", "label": "角色设定", "role": "main" },
+    { "id": "subqueries", "from": "planner", "to": "gather", "label": "子查询", "role": "main", "labelDy": 11 },
+    { "id": "pages", "from": "gather", "to": "writer", "label": "合并上下文", "role": "main" },
+    { "id": "draft", "from": "writer", "to": "report", "role": "main" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "关键结论",
+      "items": [
+        "控制流写死：plan → search → scrape → compress → write 顺序固定",
+        "LLM 只做 4 个决策：研究角色、子查询、片段筛选、报告文字"
+      ]
+    }
+  ]
+}

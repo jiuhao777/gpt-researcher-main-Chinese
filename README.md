@@ -28,6 +28,60 @@ GPT Researcher 是一个开源的深度研究智能体：规划代理把研究�
 
 ---
 
+## 🗺️ 流程图
+
+<table>
+<tr>
+<td width="46%"><img src="diagrams/gptr-workflow.png" alt="单 Agent 研究流水线"></td>
+<td width="54%"><img src="diagrams/gptr-multiagents.png" alt="多智能体 LangGraph 状态图"></td>
+</tr>
+<tr>
+<td align="center"><b>单 Agent 研究流水线</b><br><sub>默认的 research_report / detailed_report</sub></td>
+<td align="center"><b>多智能体 LangGraph 状态图</b><br><sub>report_type=multi_agents</sub></td>
+</tr>
+</table>
+
+### 两张图分别是什么
+
+**左图：单 Agent 研究流水线**
+
+入口 → 角色选择 → 子查询规划 → 检索抓取 → 合并上下文 → 分章节写作 → 报告导出。控制流写死在 `gpt_researcher/skills/researcher.py`，LLM 只在 4 个位置做决策（选角色、拆子查询、筛上下文、写报告）。
+
+**右图：多智能体 LangGraph 状态图**
+
+`browser → planner → human → researcher → writer → fact_checker → publisher`。其中 `human → planner`（计划返工）与 `publish → writer`（事实返工）是两个**有界循环**，上限分别由 `max_plan_revisions`、`max_fact_check_revisions` 控制，超限强制放行。图定义在 `multi_agents/agents/orchestrator.py`。
+
+### 交互版怎么用
+
+仓库同时提供可交互 HTML：
+
+- [`diagrams/gptr-workflow.html`](diagrams/gptr-workflow.html)
+- [`diagrams/gptr-multiagents.html`](diagrams/gptr-multiagents.html)
+
+> GitHub 不会直接渲染 HTML。点击后在页面右上角点 **Download**，下载到本地用浏览器打开。
+
+打开后可以：
+
+| 操作 | 说明 |
+|---|---|
+| Light / Dark | 切换明暗主题 |
+| 滚轮 / 右下角 ± | 缩放与平移 |
+| **Guided views** | 顶部预设视角，如「LLM 决策点」「两个审核循环」，点击高亮对应节点 |
+| **Search** | 按节点名搜索定位 |
+| **Export** | 导出 PNG / SVG / WebP，可直接放进 PPT 或文档 |
+| **Present** | 全屏演示模式 |
+
+### 想改图
+
+图由 `diagrams/*.json` 定义（泳道、节点、边、标签），改完后用 Archify CLI 重新生成：
+
+```bash
+archify render workflow diagrams/gptr-workflow.json diagrams/gptr-workflow.html
+archify validate workflow diagrams/gptr-workflow.json --quality showcase
+```
+
+---
+
 ## ✨ 相对原项目的改动
 
 ### 1. 界面中文化

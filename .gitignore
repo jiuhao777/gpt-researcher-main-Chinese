@@ -67,3 +67,11 @@ CURSOR_RULES.md
 # Eval datasets may embed third-party credentials or scraped page content
 /evals/simple_evals/problems/
 /evals/simple_evals/logs/
+
+# Archify visual-check sidecars (regenerated on demand)
+/diagrams/*.visual-check.*
+
+# pytest runtime leftovers
+/.pytest_cache/
+/pytest-of-*/
+/tmp*/
