@@ -395,6 +395,68 @@ IMAGE_GENERATION_ENABLED=false
 
 ---
 
+## 📊 接入 LangSmith（可观测性）
+
+项目内置 LangSmith 支持，能看到每次研究的完整调用链：每个 LLM 请求、检索、抓取、token 用量和耗时。
+
+### 1. 获取 API Key
+
+1. 打开 [smith.langchain.com](https://smith.langchain.com) 注册/登录
+2. 左下角 **Settings → API Keys → Create API Key**
+3. 复制以 `lsv2_pt_` 开头的 Key
+
+### 2. 写入配置
+
+```powershell
+.\.venv\Scripts\python.exe langsmith_setup.py
+```
+
+按提示粘贴 Key 和项目名（默认 `gpt-researcher-chinese`）。脚本会写入 `.env` 并当场验证连通性。
+
+也可以手动加进 `.env`：
+
+```ini
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=lsv2_pt_你的Key
+LANGCHAIN_PROJECT=gpt-researcher-chinese
+LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=lsv2_pt_你的Key
+LANGSMITH_PROJECT=gpt-researcher-chinese
+LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+```
+
+> 新旧两套变量都写是为了兼容：`langsmith` 新版读 `LANGSMITH_*`，旧版 LangChain 读 `LANGCHAIN_*`。
+
+### 3. 验证
+
+```powershell
+# 检查 Key 和网络
+.\.venv\Scripts\python.exe langsmith_setup.py --check
+
+# 跑一次研究生成 trace
+.\.venv\Scripts\python.exe cli.py "测试 LangSmith 追踪" --report_type research_report
+```
+
+跑完打开 Smith，进入 `gpt-researcher-chinese` 项目，应该能看到一次运行的完整 trace 树。
+
+### 能看到什么
+
+| 内容 | 说明 |
+|---|---|
+| Trace 树 | 一次研究拆成 plan → search → scrape → write 各步骤，父子关系清晰 |
+| LLM 调用 | 每次请求的 prompt、response、token 数 |
+| 耗时 | 每个步骤的 latency，定位慢在检索还是生成 |
+| 成本 | 按 token 估算的费用 |
+
+### 注意
+
+- **只追踪 LangChain / LangGraph 调用**。MCP 里直接用 openai SDK 的部分不会被记录。
+- 国内访问 `api.smith.langchain.com` 可能不稳定，必要时配代理，或使用自托管 LangSmith。
+- trace 会包含 prompt 和报告正文（中文内容），注意隐私；不要把 Key 提交进仓库。
+- 改完 `.env` 要重启服务才生效。
+
 ## 📄 报告导出格式
 
 | 格式 | 说明 |

@@ -65,6 +65,13 @@ def main():
     check("LANGUAGE 已配置", bool(os.getenv("LANGUAGE")), os.getenv("LANGUAGE", ""))
     check("SMART_LLM", bool(os.getenv("SMART_LLM")), os.getenv("SMART_LLM", ""))
 
+    ls_key = os.getenv("LANGSMITH_API_KEY") or os.getenv("LANGCHAIN_API_KEY")
+    if ls_key:
+        ls_project = os.getenv("LANGSMITH_PROJECT") or os.getenv("LANGCHAIN_PROJECT") or "-"
+        print(f"  [INFO] LangSmith 已启用（项目：{ls_project}），可运行 langsmith_setup.py --check 验证")
+    else:
+        print("  [INFO] LangSmith 未启用；接入：python langsmith_setup.py")
+
     print("\n[2/5] Python 依赖")
     for module in ("fastapi", "uvicorn", "langchain_openai", "docx", "htmldocx", "dashscope", "ddgs"):
         try:
